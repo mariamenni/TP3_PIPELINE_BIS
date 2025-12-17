@@ -1,5 +1,7 @@
 TP3_PIPELINE_BIS – GEO Data Explorer 🌍
 
+💻 **Démo en ligne :** [Accéder à l'application Streamlit](https://tp3pipelinebis-spz4xsy5uqvxahdoajdjxc.streamlit.app)
+
 1. Présentation du projet
 
 GEO Data Explorer est une application interactive développée en Python avec Streamlit et Plotly, permettant d’explorer des données géographiques enrichies avec des informations démographiques et de qualité de géocodage. 
