@@ -87,3 +87,19 @@ class QualityMetrics(BaseModel):
     def is_acceptable(self) -> bool:
         """Vérifie si la note est acceptable (A, B, C)."""
         return self.quality_grade in {"A", "B", "C"}
+
+
+class WaterQualityResult(BaseModel):
+    """Résultat d'analyse de la qualité de l'eau potable."""
+
+    code_commune: str
+    nom_commune: str
+    code_parametre: str
+    libelle_parametre: str
+    resultat_numerique: float | None = None
+    libelle_unite: str | None = None
+    date_prelevement: datetime
+    conclusion_conformite_prelevement: str
+
+    conformite_limites_pc_prelevement: str | None = None
+    conformite_references_pc_prelevement: str | None = None

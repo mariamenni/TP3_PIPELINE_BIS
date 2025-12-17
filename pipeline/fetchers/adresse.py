@@ -9,7 +9,7 @@ from ..models import GeocodingResult
 
 
 class AdresseFetcher(BaseFetcher):
-     """Fetcher pour le géocodage des adresses via l'API Adresse."""
+    """Fetcher pour le géocodage des adresses via l'API Adresse."""
 
     def __init__(self):
         super().__init__(ADRESSE_CONFIG)
@@ -74,7 +74,7 @@ class AdresseFetcher(BaseFetcher):
     # ==========================================================
 
     def fetch_all(
-        """Itère sur toutes les adresses."""
+        
         self,
         addresses: list[str],
         verbose: bool = True

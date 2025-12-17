@@ -4,7 +4,7 @@ from pathlib import Path
 from dataclasses import dataclass
 
 # ==========================================================
-# 📁 Chemins du projet
+#  Chemins du projet
 # ==========================================================
 
 BASE_DIR = Path(__file__).parent.parent
@@ -19,7 +19,7 @@ for dir_path in [RAW_DIR, PROCESSED_DIR, REPORTS_DIR]:
 
 
 # ==========================================================
-# ⚙️ Configuration générique d'une API
+#  Configuration générique d'une API
 # ==========================================================
 
 @dataclass
@@ -36,7 +36,7 @@ class APIConfig:
 
 
 # ==========================================================
-# 🌍 APIs utilisées dans le TP
+#  APIs utilisées dans le TP
 # ==========================================================
 
 # API Adresse — Base Adresse Nationale (géocodage)
@@ -55,17 +55,24 @@ COMMUNE_CONFIG = APIConfig(
     rate_limit=0.1
 )
 
+# API Hub'Eau — Qualité de l'eau potable
+EAU_CONFIG = APIConfig(
+    name="HubEau - Qualité Eau Potable",
+    base_url="https://hubeau.eaufrance.fr/api/v1",
+    timeout=15,
+    rate_limit=0.2
+)
 
 # ==========================================================
-# 📥 Paramètres d'acquisition
+#  Paramètres d'acquisition
 # ==========================================================
 
-MAX_ITEMS = 200          # Nombre max d'adresses (suffisant pour le TP)
+MAX_ITEMS = 200          # Nombre max d'adresses 
 BATCH_SIZE = 20          # Taille des lots si besoin
 
 
 # ==========================================================
-# 📊 Seuils de qualité
+#  Seuils de qualité
 # ==========================================================
 
 QUALITY_THRESHOLDS = {

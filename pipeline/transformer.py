@@ -28,12 +28,12 @@ class DataTransformer:
         return self
 
     def handle_missing_values(
-        """Gère les valeurs manquantes pour les colonnes numériques et texte."""
+        
         self,
         numeric_strategy: str = 'median',
         text_strategy: str = 'unknown'
     ) -> 'DataTransformer':
-        """Gère les valeurs manquantes."""
+        
 
         # Colonnes numériques
         num_cols = self.df.select_dtypes(include=[np.number]).columns

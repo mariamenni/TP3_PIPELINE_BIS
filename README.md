@@ -1,75 +1,25 @@
-TP2_PIPELINE_BIS – Exploration et Enrichissement GEO
+TP3_PIPELINE_BIS – GEO Data Explorer 🌍
 
 1. Présentation du projet
 
-Ce projet a pour objectif d’explorer et d’enrichir des données d’adresses françaises à l’aide de deux APIs :
+GEO Data Explorer est une application interactive développée en Python avec Streamlit et Plotly, permettant d’explorer des données géographiques enrichies avec des informations démographiques et de qualité de géocodage. 
 
-API Adresse (Base Adresse Nationale - BAN) : pour géocoder les adresses et récupérer latitude, longitude, code postal et ville.
-
-Geo API Gouv (Communes) : pour enrichir les adresses avec des informations complémentaires comme la population et le département.
+Le projet inclut un pipeline d’enrichissement géographique et un chatbot intelligent pour interroger le dataset et générer des analyses dynamiques.
 
 
-Le pipeline effectue :
+L'objectif:
 
-1. **Géocodage et enrichissement** des adresses.
-2. **Transformation et nettoyage** des données :
-   - Suppression des doublons,
-   - Traitement des valeurs manquantes,
-   - Normalisation des textes,
-3. **Analyse de la qualité des données** (complétude, doublons, score de géocodage).
-4. **Production de rapports et visualisations** (carte interactive, population par commune, anomalies).
-5. **Utilisation de LLaMA 3.2 locale** pour générer des recommandations d’enrichissement et du code d’analyse automatisé.
+Collecter, enrichir et transformer des adresses géographiques.
 
+Nettoyer et analyser la qualité des données.
+
+Visualiser des informations géographiques et statistiques.
+
+Interagir avec un chatbot pour l’analyse de données.
 
 
-## 2.1 Principe de fonctionnement du pipeline
-
-Le pipeline est conçu **modulaire et reproductible**. Chaque composant a un rôle clair :
-
-1. **Fetchers (pipeline/fetchers)**  
-   - `AdresseFetcher` : interroge l’API Adresse pour géocoder chaque adresse.  
-   - `CommuneFetcher` : interroge Geo API Gouv pour enrichir les adresses avec informations démographiques.  
-   - Ces fetchers héritent de `BaseFetcher`, qui gère :
-     - les requêtes HTTP avec retry automatique (Tenacity),
-     - le rate limiting pour ne pas saturer les APIs,
-     - les statistiques d’exécution (`requests_made`, `requests_failed`, `items_fetched`).
-
-2. **Modèles de données (pipeline/models.py)**  
-   - `GeocodingResult` : résultat d’une adresse géocodée.  
-   - `CommuneInfo` : informations administratives d’une commune.  
-   - `EnrichedAddress` : fusion des résultats des deux APIs, prêt pour analyse.  
-   - `QualityMetrics` : métriques pour évaluer la qualité du dataset.
-
-3. **Enrichisseur (pipeline/enricher.py)**  
-   - `GeoEnricher` coordonne les fetchers pour enrichir les adresses :
-     - Appelle `AdresseFetcher.fetch_one()` pour géocoder.
-     - Appelle `CommuneFetcher.fetch_one()` pour récupérer infos communes.
-     - Produit des objets `EnrichedAddress`.
-     - Maintient des statistiques (`total_addresses`, `geocoded`, `enriched`, `failed`).
-
-4. **Transformations et nettoyage (pipeline/transformer.py)**  
-   - `DataTransformer` permet de nettoyer et enrichir le dataset :
-     - Suppression des doublons,
-     - Traitement des valeurs manquantes (`median`, `mean`, `unknown`),
-     - Normalisation des colonnes texte (strip, lower),
-     - Interaction avec LLaMA 3.2 pour proposer des transformations supplémentaires.
-
-5. **Analyse de qualité (pipeline/quality.py)**  
-   - `QualityAnalyzer` calcule :
-     - Complétude (pourcentage de valeurs non nulles),
-     - Doublons et leur proportion,
-     - Taux de succès de géocodage et score moyen,
-     - Génère un **grade global**  selon ces métriques.
-   - Produit également un **rapport Markdown** pour visualiser la qualité du dataset.
-
-6. **Stockage (pipeline/storage.py)**  
-   - `save_raw_json()` : sauvegarde les données brutes en JSON.  
-   - `save_parquet()` : sauvegarde les données traitées en Parquet pour analyses rapides.  
-   - `load_parquet()` : recharge un fichier Parquet.
-
-
-
-2.2 Structure du projet
+2. Structure du projet
+   
 tp2-exploration/
 │
 ├─ .venv/                        # Environnement virtuel Python
@@ -90,38 +40,28 @@ tp2-exploration/
 │  ├─ enricher.py                 # Enrichissement GEO
 │  └─ config.py                   # Configurations et constantes
 ├─ tests/                         # Tests unitaires avec pytest
+├─ utils/                       
+│  ├─ charts.py                  # Fonctions de visualisation Plotly (bar, scatter, histogram, geo map…)
+│  ├─ chatbot.py                 # Classe DataChatbot pour interaction avec les données
+│  ├─ data.py                    # Fonctions de chargement et filtrage de données
+├─ .streamlit/                          
+│  ├─ config.toml                # Configuration du thème Streamlit
 ├─ .gitignore
 ├─ pyproject.toml
 ├─ main.py
 ├─ README.md
 └─ uv.lock
+├─ test_charts.ipynb/            # Notebook pour tester les visualisations
+├─ enrichissement_df.ipynb
+├─ app_streamlit.ipynb           # Application Streamlit principale
 
-3. Choix techniques et justifications
+                            
+3. Tester les visualisations dans Jupyter Notebook
 
+test_charts.ipynb permet de tester bar chart, scatter plot et cartes géographiques.
 
-| API d’enrichissement : API Adresse + Geo API Gouv           
+enrichissement_df.ipynb montre un exemple d’enrichissement GEO sur une liste d’adresses.
 
-Les deux APIs sont stables et fiables. L’API Adresse fournit un géocodage précis et rapide, et Geo API Gouv complète avec la population et le département. Cette combinaison permet un enrichissement pertinent et complet pour l’analyse. 
-
-
-| Pipeline GEO  : Python, Pandas, Plotly, LLaMA       
-
-Pandas pour la manipulation des données, Plotly pour visualisations interactives, et LLaMA pour recommandations et génération de code d’analyse. 
-
-
-| Tests: pytest                               
-
- Permet de s’assurer du bon fonctionnement des fetchers, du DataTransformer et de la qualité du pipeline. 
-
-| Stockage :              
-
-JSON pour données brutes, Parquet pour données traitées 
-Parquet est rapide et compressé, adapté aux analyses et visualisations. 
-
-| Notebooks                 
-
-exploration.ipynb, test.ipynb        
-Séparation claire : `exploration` pour analyses et visualisations, `test` pour tester le pipeline et vérifier les résultats. 
 
 
 4. Installation et exécution
@@ -129,7 +69,7 @@ Séparation claire : `exploration` pour analyses et visualisations, `test` pou
 Cloner le projet :
 
 git clone <repo_url>
-cd tp2-exploration
+cd tp3-exploration
 
 
 Créer et activer l’environnement virtuel :
@@ -141,93 +81,52 @@ source .venv/bin/activate  # Linux/macOS
 
 Installer les dépendances :
 
-uv add httpx pandas duckdb litellm python-dotenv tenacity tqdm pyarrow pydantic pytest
+uv install httpx pandas duckdb litellm python-dotenv tenacity tqdm pyarrow pydantic pytest plotly streamlit
 
 
-Exécuter le pipeline directement :
+lancer 
 
-from pipeline.main import run_pipeline_geo
-
-addresses = [
-    "10 Rue de Rivoli 75004 Paris",
-    "5 Avenue des Champs Elysées 75008 Paris",
-    "1 Place Bellecour 69002 Lyon"
-]
-
-stats = run_pipeline_geo(addresses, max_items=10, verbose=True)
+uv run streamlit run app_streamlit.py
 
 
-Ou ouvrir les notebooks pour l’exploration et le test :
-
-jupyter notebook notebooks/exploration.ipynb
-jupyter notebook notebooks/test.ipynb
-
-5. Notebooks
-exploration.ipynb:
-
-Analyse et visualisation des données GEO.
-
-Catégorisation du score (Faible, Moyen, Élevé).
-
-Carte interactive des adresses selon leur score.
-
-Visualisation de la population par commune.
-
-Détection des anomalies et doublons.
-
-Recommandations et génération de code d’analyse avec LLaMA 3.2 locale.
+ouvrir le notebooks pour le test :
 
 
-
-test.ipynb:
-
-Test du pipeline GEO complet sur un petit jeu d’adresses.
-
-Vérification de la qualité des données (A, B, C).
-
-Génération de rapports.
-
-Visualisation rapide du dataset enrichi.
-
-Exécution des tests unitaires avec pytest.
+jupyter notebook notebooks/test_charts.ipynb
 
 
-6. Tests
+5. Visualisations incluses
 
-Les tests unitaires couvrent :
+Carte interactive avec scatter_mapbox (fond sombre ou clair selon le thème).
 
-Fetchers (Adresse et Commune)
+Histogrammes et bar charts pour statistiques par ville.
 
-DataTransformer (doublons, valeurs manquantes, normalisation)
+Scatter plots pour corrélations entre variables numériques.
 
-QualityAnalyzer (calcul des métriques et génération de rapport)
+Population moyenne par ville.
 
-Exemple d’exécution :
-
-pytest tests/ -v --cov=pipeline --cov-report=html
+Matrice de corrélation.
 
 
-Tous les tests passent, et un rapport de couverture HTML est généré dans htmlcov/.
+8. chatbot
 
-7. Visualisations incluses
+Interagit avec le dataset via la classe DataChatbot.
 
-Carte interactive : latitude/longitude des adresses avec score de géocodage.
+Réponses dynamiques aux questions de l’utilisateur.
 
-Population par commune : barres représentant la population totale par commune.
-
-Analyse des anomalies : score faible (<0.5) ou doublons.
+Suggestions de questions prédéfinies : villes les plus peuplées, corrélations, analyses automatiques.
 
 
-8. Conclusion
+9. Conclusion
 
-Ce projet illustre :
+Ce projet illustre :
 
-L’intégration de plusieurs APIs pour enrichir des données géographiques.
+La mise en place d’un pipeline GEO modulaire et reproductible.
 
-La conception d’un pipeline modulaire, testable et reproductible.
+L’intégration de données enrichies et nettoyées pour des analyses interactives.
 
-L’usage de LLaMA pour guider l’analyse et générer du code.
+La visualisation de données géographiques et statistiques via Plotly.
 
-La production de visualisations interactives et de rapports de qualité.
+L’utilisation de Streamlit pour créer un dashboard interactif.
 
-L’utilisation des deux APIs permet d’assurer la fiabilité, la complétude et la pertinence des données pour toute analyse géographique et démographique.
+L’intégration d’un chatbot pour faciliter l’analyse exploratoire.

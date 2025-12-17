@@ -24,7 +24,7 @@ class BaseFetcher(ABC):
     def __init__(self, config: APIConfig):
         # Configuration de l'API (URL, timeout, rate limit)
         self.config = config
-         # Statistiques d'utilisation
+        # Statistiques d'utilisation
         self.stats = {
             "requests_made": 0,
             "requests_failed": 0,
@@ -82,7 +82,7 @@ class BaseFetcher(ABC):
     # ==========================================================
 
     def _rate_limit(self):
-         """Respecte le délai entre chaque requête pour éviter le blocage."""
+        """Respecte le délai entre chaque requête pour éviter le blocage."""
         time.sleep(self.config.rate_limit)
 
     # ==========================================================

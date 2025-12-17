@@ -46,7 +46,7 @@ class QualityAnalyzer:
         return success_rate, avg_score
 
     def calculate_null_counts(self) -> dict:
-         """Compte les valeurs nulles par colonne."""
+        """Compte les valeurs nulles par colonne."""
         return self.df.isnull().sum().to_dict()
 
     # ==========================================================
